@@ -10,7 +10,7 @@ class Metadata:
             "file_name": path.name,
             "creation_date": Metadata.extract_creation_date(path.stat().st_birthtime),
             "size": path.stat().st_size,
-            "full_path": path.absolute(),
+            "full_path": str(path.absolute()),
         }
 
     @staticmethod
