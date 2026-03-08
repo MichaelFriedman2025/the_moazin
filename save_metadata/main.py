@@ -3,7 +3,6 @@ from mongo_connection import MongoConnection
 from elastic_connection import ElasticConnection
 from speach_to_text import STT
 from logs import Logger
-import json
 import uuid
 
 logger = Logger.get_logger(name="save_metadata/main")
