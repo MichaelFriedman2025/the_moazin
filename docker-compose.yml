@@ -24,8 +24,6 @@ services:
     volumes:
       - kafka_kraft:/var/lib/kafka/data
 
-
-
   mongo:
     image: mongo
     container_name: mongo
