@@ -2,6 +2,7 @@ from elasticsearch import Elasticsearch
 import os
 
 
+
 class ElasticConnection:
 
     def __init__(self):
@@ -10,6 +11,8 @@ class ElasticConnection:
         self.doing_scema()
 
     def doing_scema(self):
+        if self.client.indices.exists(index="audio"):
+            self.client.indices.delete(index="audio")
         scema = {
             "mappings": {
                 "properties": {
@@ -24,4 +27,4 @@ class ElasticConnection:
         self.client.indices.create(index="audio",body=scema)
 
     def insert_data(self, data):
-        self.client.update(index="audio", id=data["id"], document=data,doc_as_upsert=True)
+        self.client.update(index="audio", id=data["id"], doc=data,doc_as_upsert=True)

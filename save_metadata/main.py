@@ -2,8 +2,11 @@ from kafka_consumer import KafkaConsumer
 from mongo_connection import MongoConnection
 from elastic_connection import ElasticConnection
 from speach_to_text import STT
+from logs import Logger
+import json
 import uuid
 
+logger = Logger.get_logger(name="save_metadata/main")
 es = ElasticConnection()
 consumer = KafkaConsumer()
 fs = MongoConnection()
@@ -15,14 +18,28 @@ try:
         if msg is None:
             continue
         if msg.error():
-            print("❌ Error:", msg.error())
+            logger.error(f"❌ the consumer have an Error: {msg.error()}")
             continue
-        
-        data = consumer.recive_data(msg)
-        data["id"] = str(uuid.uuid5(namespace=uuid.NAMESPACE_DNS,name=data["file_name"]))
-        fs.save_data(data["full_path"],data["id"])
-        data["text_from_audio"] = stt.convert_stt(data["full_path"])
-        es.insert_data(data)
+
+        try:
+            data = consumer.recive_data(msg)
+            logger.debug(f"the data came successfully, the data: {data}")
+            data["id"] = str(
+                uuid.uuid5(namespace=uuid.NAMESPACE_DNS, name=data["file_name"])
+            )
+            logger.debug("the data.id maded successfully")
+
+            fs.save_data(data["full_path"], data["id"])
+            logger.debug("the data stored in mongo successfully")
+
+            data["text_from_audio"] = str(stt.convert_stt(data["full_path"]))
+            logger.debug("the text from stt insert in data successfully")
+
+            es.insert_data(data)
+            logger.debug(f"the data stored in elastic successfully, the data: {data}")
+
+        except Exception as error:
+            logger.error(f"❌ the consumer have an Error:{error}\n and data: {data}" )
 
 except KeyboardInterrupt:
     print("\n🔴 Stopping consumer")
